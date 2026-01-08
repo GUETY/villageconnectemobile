@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart'; // correction du chemin
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/formatted_number.dart';
 import '../package_entity.dart';
 
 // Carte affichant un forfait
@@ -25,6 +26,14 @@ class PackageCard extends StatelessWidget {
           color: package.isPopular ? AppColors.primary : AppColors.greyLight,
           width: package.isPopular ? 2 : 1,
         ),
+        // Ombre subtile
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,13 +159,12 @@ class PackageCard extends StatelessWidget {
                         color: AppColors.textGrey,
                       ),
                     ),
-                    Text(
-                      '${package.price.toStringAsFixed(0)} FCFA',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
+                    // Afficher le prix formaté
+                    FormattedNumber(
+                      package.price,
+                      suffix: 'FCFA',
+                      color: AppColors.primary,
+                      bold: true,
                     ),
                   ],
                 ),

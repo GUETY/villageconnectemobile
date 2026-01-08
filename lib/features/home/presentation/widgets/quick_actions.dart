@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../scanner/pages/qr_scanner_page.dart';
 
 // Widget pour les actions rapides
 class QuickActionsCard extends StatelessWidget {
@@ -20,6 +21,14 @@ class QuickActionsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
+        // Ombre subtile
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +58,26 @@ class QuickActionsCard extends StatelessWidget {
             title: 'Scanner Code',
             subtitle: 'Code reçu par SMS/WhatsApp',
             color: const Color(0xFFB946EF), // Violet
-            onPressed: onScanCode,
+            onPressed: () async {
+              // Ouvrir la page de scanner
+              final result = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const QRScannerPage(),
+                ),
+              );
+
+              if (result != null) {
+                // Afficher le code scanné
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Code scanné : $result'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+                // Appeler le callback
+                onScanCode();
+              }
+            },
             showTrailing: true,
           ),
         ],
@@ -123,7 +151,7 @@ class _QuickActionButton extends StatelessWidget {
               ),
               // Icône trailing (optionnel)
               if (showTrailing)
-                const Icon(Icons.more_vert, color: AppColors.textLight),
+                const Icon(Icons.arrow_forward, color: AppColors.primary),
             ],
           ),
         ),
