@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
-import 'features/main/pages/main_screen.dart'; // nouveau import
+import 'features/main/pages/main_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Village Connecté',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
-      home: const MainScreen(), // utiliser MainScreen au lieu de HomePage
+      home: const MainScreen(),
     );
   }
 }
