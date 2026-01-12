@@ -15,7 +15,13 @@ class MyApp extends StatelessWidget {
       title: 'Village Connecté',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
-      home: const MainScreen(),
+      home: const MainScreen(), // utiliser MainScreen au lieu de HomePage
+      routes: {
+        '/home': (_) => const MainScreen(initialIndex: 0),
+        '/packages': (_) => const MainScreen(initialIndex: 1),
+        '/history': (_) => const MainScreen(initialIndex: 2),
+        '/help': (_) => const MainScreen(initialIndex: 3),
+      },
     );
   }
 }

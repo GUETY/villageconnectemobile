@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/bottom_nav_bar.dart';
 import '../../home/presentation/pages/home_page.dart';
 import '../../packages/pages/packages_page.dart';
+import '../../history/pages/main_history_page.dart';
+import '../../help/pages/main_help_page.dart';
 
 // Écran principal qui gère la navigation entre pages
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  // Permet d'ouvrir directement un onglet (0=Accueil, 1=Forfaits, 2=Historique, 3=Aide)
+  const MainScreen({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -13,12 +18,24 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   // Index de la page active (0=Accueil, 1=Forfaits, 2=Historique, 3=Aide)
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = _clampIndex(widget.initialIndex);
+  }
+
+  int _clampIndex(int value) {
+    if (value < 0) return 0;
+    if (value >= _pages.length) return _pages.length - 1;
+    return value;
+  }
 
   // Fonction pour naviguer vers une page spécifique
   void _navigateToPage(int index) {
     setState(() {
-      _currentIndex = index;
+      _currentIndex = _clampIndex(index);
     });
   }
 
@@ -30,8 +47,10 @@ class _MainScreenState extends State<MainScreen> {
     ),
     // Page Forfaits
     const PackagesPageContent(),
-    // TODO: Page Historique
-    // TODO: Page Aide
+    // Page Historique
+    const HistoryPageContent(),
+    // Page Aide
+    const HelpPageContent(),
   ];
 
   @override
