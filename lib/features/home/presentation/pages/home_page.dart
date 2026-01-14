@@ -1,51 +1,70 @@
 import 'package:flutter/material.dart';
-import '../widgets/home_header.dart';
+import '../../../../core/theme/app_colors.dart';
+
+// Importation de tes widgets personnalisés
+import '../widgets/home_header.dart';   
 import '../widgets/welcome_card.dart';
 import '../widgets/stats_card.dart';
-import '../widgets/quick_actions.dart';
+import '../widgets/quick_actions.dart'; // Ou quick_actions_card.dart selon ton fichier
 
-// Contenu de la page d'accueil (sans Scaffold, c'est MainScreen qui le fournit)
-class HomePageContent extends StatelessWidget {
-  // Callback pour naviguer vers la page Forfaits
-  final VoidCallback? onNavigateToPackages;
+// Cette page n'affiche QUE le contenu de l'accueil (Cartes, Stats...)
+// Elle délègue la navigation au parent (MainScreen)
+class HomePageContentOnly extends StatelessWidget {
+  final VoidCallback onGoToPackages;
+  final VoidCallback onGoToScanner;
 
-  const HomePageContent({
+  const HomePageContentOnly({
     super.key,
-    this.onNavigateToPackages,
+    required this.onGoToPackages,
+    required this.onGoToScanner,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // En-tête personnalisé
-          const HomeHeader(),
-          const SizedBox(height: 8),
-          
-          // Carte de bienvenue avec callback
-          WelcomeCard(
-            // Passer directement la callback (ou une fonction vide si null)
-            onPackagePressed: onNavigateToPackages ?? () {},
-          ),
-          
-          // Statistiques
-          const StatsCard(),
-          
-          // Actions rapides
-          QuickActionsCard(
-            onBuyPackage: () {
-              // Appeler la callback pour naviguer vers Forfaits
-              onNavigateToPackages?.call();
-            },
-            onScanCode: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Scanner un code')),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      // L'AppBar est ici pour l'accueil spécifiquement
+      appBar: AppBar(
+        title: const Text('Village Connecté'),
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header
+            const HomeHeader(), 
+            
+            const SizedBox(height: 16),
+            
+            // Carte Bienvenue
+            WelcomeCard(
+              onPackagePressed: onGoToPackages, 
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Carte Stats
+            const StatsCard(),
+            
+            const SizedBox(height: 16),
+            
+            // Actions Rapides
+            QuickActionsCard(
+              onBuyPackage: onGoToPackages,
+              onScanCode: onGoToScanner,
+            ), 
+            
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }

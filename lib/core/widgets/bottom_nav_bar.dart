@@ -7,6 +7,7 @@ class CustomBottomNavBar extends StatelessWidget {
   final Function(int) onTap;
 
   const CustomBottomNavBar({
+    super.key,
     required this.currentIndex,
     required this.onTap,
   });
@@ -16,17 +17,19 @@ class CustomBottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: AppColors.white,
+      type: BottomNavigationBarType.fixed, // Important pour 4 items
+      backgroundColor: Colors.white,
       selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.textLight,
-      items: [
+      unselectedItemColor: Colors.grey,
+      showUnselectedLabels: true,
+      elevation: 8,
+      items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Accueil',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.local_offer),
+          icon: Icon(Icons.wifi),
           label: 'Forfaits',
         ),
         BottomNavigationBarItem(
@@ -34,7 +37,7 @@ class CustomBottomNavBar extends StatelessWidget {
           label: 'Historique',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.help),
+          icon: Icon(Icons.help_outline),
           label: 'Aide',
         ),
       ],

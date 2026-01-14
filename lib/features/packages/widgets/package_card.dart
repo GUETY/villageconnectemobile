@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/formatted_number.dart';
 import '../package_entity.dart';
+import '../pages/payment_selection_page.dart';
 
 // Carte affichant un forfait
 class PackageCard extends StatelessWidget {
@@ -112,7 +113,7 @@ class PackageCard extends StatelessWidget {
                       child: _DetailItem(
                         icon: Icons.speed,
                         label: 'Débit',
-                        value: '${package.speed.toStringAsFixed(0)} Mbps',
+                        value: '10 Mbps',
                       ),
                     ),
                   ],
@@ -124,15 +125,15 @@ class PackageCard extends StatelessWidget {
                       child: _DetailItem(
                         icon: Icons.devices,
                         label: 'Appareils',
-                        value: '${package.devices} appareils',
+                        value: 'Illimité',
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
+                    const Expanded(
                       child: _DetailItem(
                         icon: Icons.headset_mic,
                         label: 'Support',
-                        value: package.support,
+                        value: '24/7',
                       ),
                     ),
                   ],
@@ -169,24 +170,36 @@ class PackageCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Bouton "Acheter maintenant"
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onBuyPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: package.isPopular
-                          ? AppColors.primary
-                          : AppColors.greyLight,
-                      foregroundColor: package.isPopular
-                          ? AppColors.white
-                          : AppColors.textDark,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                // Bouton "Acheter maintenant" modifié
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Naviguer vers la page de sélection du paiement
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => PaymentSelectionPage(
+                              package: package,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: package.isPopular
+                            ? AppColors.primary
+                            : AppColors.greyLight,
+                        foregroundColor: package.isPopular
+                            ? AppColors.white
+                            : AppColors.textDark,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
+                      child: const Text('Acheter maintenant'),
                     ),
-                    child: const Text('Acheter maintenant'),
                   ),
                 ),
               ],

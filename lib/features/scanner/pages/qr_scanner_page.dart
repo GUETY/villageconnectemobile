@@ -13,20 +13,10 @@ class QRScannerPage extends StatefulWidget {
 // État de la page scanner
 class _QRScannerPageState extends State<QRScannerPage> {
   // Contrôleur du scanner (gère la caméra)
-  late MobileScannerController controller;
+  final MobileScannerController controller = MobileScannerController();
   
   // Flag pour éviter les scans multiples du même code
   bool _scanned = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialiser le contrôleur de scanner
-    controller = MobileScannerController(
-      autoStart: true,  // Démarrer automatiquement la caméra
-      torchEnabled: false,  // Torche éteinte par défaut
-    );
-  }
 
   @override
   void dispose() {
@@ -63,24 +53,22 @@ class _QRScannerPageState extends State<QRScannerPage> {
           // Si déjà scanné, ignorer
           if (_scanned) return;
 
-          // Récupérer la liste des codes détectés
-          final List<BarcodeCapture> barcodes = [capture];
+          // Récupérer les codes détectés
+          final List<Barcode> barcodes = capture.barcodes;
           
-          // Parcourir chaque capture détectée
-          for (final barcodeCapture in barcodes) {
-            // Extraire les codes de la capture
-            for (final barcode in barcodeCapture.barcodes) {
-              // Extraire la valeur du code QR
-              final String? code = barcode.rawValue;
+          // Parcourir chaque code détecté
+          for (final barcode in barcodes) {
+            // Extraire la valeur du code QR
+            final String? code = barcode.rawValue;
 
-              // Si le code existe
-              if (code != null) {
-                // Marquer comme scanné
-                _scanned = true;
+            // Si le code existe
+            if (code != null) {
+              // Marquer comme scanné
+              _scanned = true;
 
-                // Afficher un dialog de confirmation
-                _showConfirmDialog(code);
-              }
+              // Afficher un dialog de confirmation
+              _showConfirmDialog(code);
+              break; // Sortir de la boucle
             }
           }
         },
@@ -95,35 +83,21 @@ class _QRScannerPageState extends State<QRScannerPage> {
         onPressed: () async {
           // Basculer la torche (on/off)
           await controller.toggleTorch();
-          // Rafraîchir l'interface
-          setState(() {});
         },
         
         // Contenu du bouton (icône changeante)
         child: ValueListenableBuilder(
-          // Écouter l'état de la torche
-          valueListenable: controller.torchState,
+          // Écouter l'état du contrôleur
+          valueListenable: controller,
           
           // Builder pour reconstruire l'icône
           builder: (context, state, child) {
-            // Afficher l'icône correspondant à l'état
-            switch (state) {
-              // Torche allumée
-              case TorchState.on:
-                return const Icon(Icons.flashlight_on);
-              
-              // Torche éteinte
-              case TorchState.off:
-                return const Icon(Icons.flashlight_off);
-              
-              // Torche éteinte
-              case TorchState.off:
-                return const Icon(Icons.flash_off);
-              
-              // Mode auto (Android seulement)
-              // case TorchState.auto:
-              //   return const Icon(Icons.flash_auto);
-            }
+            // Si torche allumée, afficher icône "on", sinon "off"
+            return Icon(
+              state.torchState == TorchState.on 
+                  ? Icons.flashlight_on 
+                  : Icons.flashlight_off,
+            );
           },
         ),
       ),
@@ -178,7 +152,9 @@ class _QRScannerPageState extends State<QRScannerPage> {
               // Fermer le dialog
               Navigator.of(context).pop();
               // Permettre un nouveau scan
-              _scanned = false;
+              setState(() {
+                _scanned = false;
+              });
             },
             child: const Text('Rescanner'),
           ),

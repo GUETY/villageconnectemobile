@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../history_repository.dart';
-import '../widgets/history_card.dart';
+import 'package:villageconnecte_mobile/core/theme/app_colors.dart';
+import 'package:villageconnecte_mobile/features/history/history_repository.dart';
+import 'package:villageconnecte_mobile/features/history/widgets/history_card.dart';
 
 // Page Historique principale (sans Scaffold, gérée par MainScreen)
 class HistoryPageContent extends StatelessWidget {
