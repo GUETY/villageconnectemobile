@@ -1,7 +1,39 @@
+import 'package:villageconnecte_mobile/core/api/history_api.dart';
 import 'history_entity.dart';
 
 class HistoryRepository {
-  static List<HistoryItem> getPurchases() {
+  // Récupérer l'historique des achats depuis l'API en temps réel
+  static Future<List<HistoryItem>> getPurchases() async {
+    try {
+      print('🔄 [REPOSITORY] Chargement de l\'historique depuis la BASE DE DONNÉES...');
+      
+      // Utiliser la nouvelle API dédiée à l'historique
+      // Tentative avec fallback automatique entre les endpoints
+      final purchases = await HistoryApi.getHistoryWithFallback();
+      
+      if (purchases.isEmpty) {
+        print('⚠️ [REPOSITORY] Aucun achat trouvé dans la base de données');
+      } else {
+        print('✅ [REPOSITORY] ${purchases.length} achats RÉELS récupérés de la BASE');
+      }
+      
+      return purchases;
+      
+    } catch (e) {
+      print('❌ [REPOSITORY] Erreur connexion à l\'API: $e');
+      print('💡 [REPOSITORY] Vérifiez:');
+      print('   1. Connexion Internet');
+      print('   2. API disponible: https://api.villageconnecte.voisilab.online');
+      print('   3. Token d\'authentification valide');
+      print('⚠️ [REPOSITORY] Affichage des données de DÉMONSTRATION par défaut');
+      
+      // En cas d'erreur API, retourner des données de démonstration
+      return _getMockPurchases();
+    }
+  }
+
+  // Données de démonstration (fallback)
+  static List<HistoryItem> _getMockPurchases() {
     return const [
       HistoryItem(
         id: 'h1',
