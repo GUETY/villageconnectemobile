@@ -96,8 +96,36 @@ class HistoryCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Voir détails pour ${item.name}')),
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Détails du forfait'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Nom : ${item.name}'),
+                        const SizedBox(height: 4),
+                        Text('Description : ${item.description}'),
+                        const SizedBox(height: 4),
+                        Text('Date : ${item.dateLabel}'),
+                        const SizedBox(height: 4),
+                        Text('Code : ${item.code}'),
+                        const SizedBox(height: 4),
+                        Text('Prix : ${item.price} ${item.currency}'),
+                        const SizedBox(height: 4),
+                        Text('Statut : ${item.statusText()}'),
+                        const SizedBox(height: 4),
+                        Text('Utilisation : ${item.usageLabel}'),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Fermer'),
+                      ),
+                    ],
+                  ),
                 );
               },
               child: const Text(

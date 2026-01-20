@@ -184,16 +184,58 @@ class PaymentSelectionPage extends StatelessWidget {
                 final method = paymentMethods[index];
                 return _PaymentMethodCard(
                   method: method,
-                  onTap: () {
-                    // Naviguer vers la page de traitement du paiement
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => PaymentProcessingPage(
-                          package: package,
-                          paymentMethod: method,
+                  onTap: () async {
+                    // Si la méthode nécessite un numéro (hors prépayé)
+                    if (method.id != 'prepaid_code') {
+                      String? phoneNumber = await showDialog<String>(
+                        context: context,
+                        builder: (context) {
+                          String input = '';
+                          return AlertDialog(
+                            title: Text('Entrer le numéro de téléphone'),
+                            content: TextField(
+                              keyboardType: TextInputType.phone,
+                              decoration: InputDecoration(hintText: 'Numéro mobile'),
+                              onChanged: (value) => input = value,
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text('Annuler'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (input.isNotEmpty) {
+                                    Navigator.of(context).pop(input);
+                                  }
+                                },
+                                child: Text('Valider'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      if (phoneNumber == null || phoneNumber.isEmpty) return;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PaymentProcessingPage(
+                            package: package,
+                            paymentMethod: method,
+                            phoneNumber: phoneNumber,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      // Code prépayé : pas de numéro
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PaymentProcessingPage(
+                            package: package,
+                            paymentMethod: method,
+                          ),
+                        ),
+                      );
+                    }
                   },
                 );
               },

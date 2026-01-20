@@ -6,8 +6,7 @@ import '../package_entity.dart';
 // API pour gérer les forfaits
 class ForfaitsApi {
   
-  // 1. Récupérer tous les forfaits
-  // Route backend : /api/forfaits
+  // 1. Récupérer tous les forfaits (GET /api/forfaits)
   static Future<ApiResponse<List<PackageEntity>>> getAll({String? token}) async {
     try {
       print('📡 Récupération des forfaits...');
@@ -17,34 +16,21 @@ class ForfaitsApi {
         requestOptions.headers = {'Authorization': 'Bearer $token'};
       }
 
-      // CORRECTION : Utilisation de 'forfaits' au lieu de 'packages'
-      final response = await ApiClient.dio.get(
-        'forfaits', 
-        options: requestOptions
-      );
-
-      print('Status: ${response.statusCode}');
+      final response = await ApiClient.dio.get('forfaits', options: requestOptions);
 
       if (response.statusCode == 200) {
         final data = response.data;
         List<dynamic> jsonList = [];
-        
-        // Logique de parsing robuste
-        if (data is List) {
-          jsonList = data;
-        } else if (data is Map) {
+        if (data is List) jsonList = data;
+        else if (data is Map) {
           if (data['data'] != null) jsonList = data['data'];
           else if (data['forfaits'] != null) jsonList = data['forfaits'];
         }
 
         final packages = jsonList
             .map((json) {
-              try {
-                return PackageEntity.fromJson(json as Map<String, dynamic>);
-              } catch (e) {
-                print('❌ Erreur parsing forfait: $e');
-                return null;
-              }
+                try { return PackageEntity.fromJson(json as Map<String, dynamic>); } 
+                catch (e) { return null; }
             })
             .whereType<PackageEntity>()
             .toList();
@@ -59,18 +45,13 @@ class ForfaitsApi {
     }
   }
 
-  // 2. Récupérer un forfait par ID
-  // Route backend : /api/forfaits/{id}
+  // 2. Récupérer un forfait par ID (GET /api/forfaits/{id})
   static Future<ApiResponse<PackageEntity>> getById(String id) async {
     try {
-      // CORRECTION : 'forfaits/$id'
       final response = await ApiClient.dio.get('forfaits/$id');
-
       if (response.statusCode == 200) {
         final data = response.data;
-        Map<String, dynamic> jsonData = (data is Map && data.containsKey('data')) 
-            ? data['data'] 
-            : data;
+        Map<String, dynamic> jsonData = (data is Map && data.containsKey('data')) ? data['data'] : data;
         return ApiResponse.success(PackageEntity.fromJson(jsonData));
       }
       return ApiResponse.error('Forfait introuvable');
@@ -81,42 +62,76 @@ class ForfaitsApi {
     }
   }
 
-  // 3. Initier un paiement / Acheter un forfait
-  // Route backend : /api/transactions
+  // 3. Initier un paiement (POST /api/transactions)
+  // Cette méthode crée la transaction et peut retourner le code directement si le back est configuré ainsi
   static Future<ApiResponse<Map<String, dynamic>>> initiatePayment({
     required String forfaitId,
     required String methodePaiement,
+    String? phoneNumber,
+    int? duration, // <-- AJOUT ICI
   }) async {
     try {
-      print('📡 Création transaction pour le forfait $forfaitId via $methodePaiement...');
+      print('📡 Achat forfait $forfaitId via $methodePaiement sur /api/transactions');
       
-      // CORRECTION : Utilisation de 'transactions' pour créer l'achat
-      final String endpoint = 'transactions'; 
+      final Map<String, dynamic> payload = {
+        'forfait_id': forfaitId,
+        'payment_method': methodePaiement,
+      };
+
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        payload['phone_number'] = phoneNumber;
+      }
+
+      if (duration != null) {
+        payload['duration'] = duration; // <-- AJOUT ICI
+      }
 
       final response = await ApiClient.dio.post(
-        endpoint, 
-        data: {
-          // CORRECTION : Adaptation des clés pour correspondre au français des routes
-          'forfait_id': forfaitId,       // Probablement 'forfait_id' au lieu de 'package_id'
-          'payment_method': methodePaiement, // ou 'mode_paiement' selon votre backend
-          // 'amount': ... souvent calculé par le back grâce à l'ID
-        },
+        'transactions',
+        data: payload,
       );
 
-      print('Status Paiement: ${response.statusCode}');
+      print('✅ Réponse Paiement: ${response.statusCode}');
+      print('📦 Données reçues: ${response.data}');
 
+      // On renvoie toute la donnée (qui peut contenir le code généré, ex: 'access_code')
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ Transaction créée avec succès');
-        // La réponse doit contenir le code wifi ou les détails transaction
         return ApiResponse.success(response.data);
       }
 
       return ApiResponse.error('Erreur lors du paiement');
     } on DioException catch (e) {
-        print('🚨 Erreur paiement: ${e.response?.data}'); 
-        return ApiResponse.error(_handleDioError(e));
+      print('🚨 Erreur API transaction: ${e.response?.data}');
+      return ApiResponse.error(_handleDioError(e));
     } catch (e) {
       return ApiResponse.error('Erreur: $e');
+    }
+  }
+
+  // 4. NOUVEAU : Récupérer les codes générés (GET /api/codes)
+  // Utilisez cette fonction après le paiement si le code n'est pas renvoyé directement par la transaction
+  // ou pour afficher l'historique "Mes Codes".
+  static Future<ApiResponse<List<dynamic>>> getMyCodes() async {
+    try {
+      print('📡 Récupération des codes sur /api/codes');
+      
+      // Le token est injecté automatiquement par l'interceptor ApiClient si l'utilisateur est connecté
+      final response = await ApiClient.dio.get('codes');
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+         List<dynamic> codesList = [];
+
+         // Adaptation selon la réponse du backend
+         if (data is List) codesList = data;
+         else if (data is Map && data['data'] != null) codesList = data['data'];
+
+        print('✅ ${codesList.length} codes récupérés');
+        return ApiResponse.success(codesList);
+      }
+      return ApiResponse.error('Impossible de récupérer les codes');
+    } on DioException catch (e) {
+      return ApiResponse.error(_handleDioError(e));
     }
   }
 
@@ -132,7 +147,7 @@ class ForfaitsApi {
       case DioExceptionType.connectionError:
         return 'Pas de connexion internet';
       default:
-        return 'Erreur réseau ou serveur';
+        return 'Erreur réseau';
     }
   }
 }
